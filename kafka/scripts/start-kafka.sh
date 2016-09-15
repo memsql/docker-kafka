@@ -17,12 +17,10 @@ fi
 # Set the external host and port
 if [ ! -z "$ADVERTISED_HOST" ]; then
     echo "advertised host: $ADVERTISED_HOST"
-    # sed -r -i "s/#(advertised.host.name)=(.*)/\1=$ADVERTISED_HOST/g" $KAFKA_HOME/config/server.properties
     echo "advertised.host.name=$ADVERTISED_HOST" >> $KAFKA_HOME/config/server.properties
 fi
 if [ ! -z "$ADVERTISED_PORT" ]; then
     echo "advertised port: $ADVERTISED_PORT"
-    # sed -r -i "s/#(advertised.port)=(.*)/\1=$ADVERTISED_PORT/g" $KAFKA_HOME/config/server.properties
     echo "advertised.port=$ADVERTISED_PORT" >> $KAFKA_HOME/config/server.properties
 fi
 
@@ -59,11 +57,13 @@ if [ ! -z "$NUM_PARTITIONS" ]; then
     sed -r -i "s/(num.partitions)=(.*)/\1=$NUM_PARTITIONS/g" $KAFKA_HOME/config/server.properties
 fi
 
-# Enable/disable auto creation of topics
-if [ ! -z "$AUTO_CREATE_TOPICS" ]; then
-    echo "auto.create.topics.enable: $AUTO_CREATE_TOPICS"
-    echo "auto.create.topics.enable=$AUTO_CREATE_TOPICS" >> $KAFKA_HOME/config/server.properties
-fi
-
 # Run Kafka
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
+
+sleep 5
+
+CREATE_TOPIC="$KAFKA_HOME/bin/kafka-topics.sh --create \
+    --zookeeper $ADVERTISED_HOST:2181 --replication-factor 1 --topic"
+
+$CREATE_TOPIC tweets-json
+$CREATE_TOPIC tweets-csv
