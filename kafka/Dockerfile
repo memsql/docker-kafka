@@ -28,4 +28,4 @@ ADD supervisor/* /etc/supervisor/conf.d/
 # 2181 is zookeeper, 9092 is kafka
 EXPOSE 2181 9092
 
-CMD ["supervisord", "-n"]
+CMD ["/scripts/start.sh"]
