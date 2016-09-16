@@ -1,7 +1,8 @@
 Kafka in Docker
 ===
 
-This repository provides everything you need to run Kafka in Docker.
+This repository provides everything you need to run Kafka in Docker, including
+an optional Twitter producer script.
 
 Why?
 ---
@@ -12,26 +13,42 @@ in the same container. This means:
 * No dependency on an external Zookeeper host, or linking to another container
 * Zookeeper and Kafka are configured to work together out of the box
 
-Build from Source
----
-
-```bash
-docker build -t memsql/kafka kafka/
-```
-
 Run
 ---
 
 ```bash
-docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=`docker-machine ip \`docker-machine active\`` --env ADVERTISED_PORT=9092 memsql/kafka
+docker run --rm --name memsql_kafka \
+    -p 2181:2181 -p 9092:9092 \
+    memsql/kafka
 ```
 
-```bash
-export KAFKA=`docker-machine ip \`docker-machine active\``:9092
-kafka-console-producer.sh --broker-list $KAFKA --topic test
-```
+See `kafka/scripts/start-kafka.sh` for a list of optional environment variables.
+
+To run the included Twitter producer:
 
 ```bash
-export ZOOKEEPER=`docker-machine ip \`docker-machine active\``:2181
-kafka-console-consumer.sh --zookeeper $ZOOKEEPER --topic test
+docker run --rm --name memsql_kafka \
+    -p 2181:2181 -p 9092:9092 \
+    -e PRODUCE_TWITTER=1 \
+    -e TWITTER_CONSUMER_KEY \
+    -e TWITTER_CONSUMER_SECRET \
+    -e TWITTER_ACCESS_TOKEN \
+    -e TWITTER_ACCESS_SECRET \
+    memsql/kafka
 ```
+
+Make sure that those Twitter secrets are in your environment.
+
+The Twitter producer writes stripped-down Twitter data to two topics:
+`tweets-json` and `tweets-tsv`. See `kafka/scripts/producer.py`.
+
+Build from Source
+-----------------
+
+```bash
+make build
+make run
+```
+
+Or, use `make run-with-twitter`. See Makefile for how it pulls in Twitter
+credentials.

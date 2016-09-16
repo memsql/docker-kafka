@@ -60,10 +60,14 @@ fi
 # Run Kafka
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
 
-sleep 5
+# If we want to use the included Twitter producer, create the topics that it
+# will use
+if [ "$PRODUCE_TWITTER" == 1 ]; then
+    sleep 5
 
-CREATE_TOPIC="$KAFKA_HOME/bin/kafka-topics.sh --create \
-    --zookeeper $ADVERTISED_HOST:2181 --replication-factor 1 --topic"
+    CREATE_TOPIC="$KAFKA_HOME/bin/kafka-topics.sh --create \
+        --zookeeper $ADVERTISED_HOST:2181 --replication-factor 1 --topic"
 
-$CREATE_TOPIC tweets-json
-$CREATE_TOPIC tweets-csv
+    $CREATE_TOPIC tweets-json
+    $CREATE_TOPIC tweets-csv
+fi
