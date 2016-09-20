@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from datetime import datetime
 import os
 import json
 import time
@@ -24,6 +25,9 @@ TWITTER_CONSUMER_KEY = safe_getenv("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = safe_getenv("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = safe_getenv("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_SECRET = safe_getenv("TWITTER_ACCESS_SECRET")
+
+KEYWORDS_TO_TRACK = ["hillary", "trump"]
+DATETIME_FORMAT = "%a %b %d %H:%M:%S %z %Y"
 
 
 class KafkaProducerException(Exception):
@@ -66,13 +70,15 @@ def send_json(producer, tweet_dict):
 # Send a tweet to Kafka as a TSV record.
 def send_tsv(producer, tweet_dict):
 
-    # Make sure that newlines and tabs are escaped in the tweet text.
+    # Make sure that newlines and tabs are escaped in the tweet text and
+    # usernames.
     text = tweet_dict["text"].encode("unicode_escape").decode("ascii")
+    username = tweet_dict["username"].encode("unicode_escape").decode("ascii")
 
     out = "\t".join([
         str(tweet_dict["id"]),
-        str(tweet_dict["user_id"]),
-        tweet_dict["created_at"],
+        username,
+        str(tweet_dict["created_at"]),
         str(tweet_dict["retweet_count"]),
         str(tweet_dict["favorite_count"]),
         text
@@ -99,7 +105,7 @@ def run():
 
     # GetStreamFilter is a generator that returns dictionaries. Each dict is a
     # Twitter record that has already been decoded by a JSON.loads() call.
-    for line in api.GetStreamFilter(track=['hillary', 'trump']):
+    for line in api.GetStreamFilter(track=KEYWORDS_TO_TRACK):
 
         # This stream will contain control messages that aren't tweets. See
         # https://dev.twitter.com/streaming/overview/messages-types. This will
@@ -119,10 +125,14 @@ def run():
         # Strip down the tweet to the essentials, to reduce the outbound network
         # usage of Public Kafka.
         keys_to_keep = [
-            "created_at", "favorite_count", "id", "retweet_count", "text"
+            "favorite_count", "id", "retweet_count", "text"
         ]
         small_tweet = {k: original_tweet[k] for k in keys_to_keep}
-        small_tweet["user_id"] = original_tweet["user"]["id"]
+        small_tweet["username"] = original_tweet["user"]["screen_name"]
+
+        # Include the tweet datetime as a Unix timestamp.
+        dt = datetime.strptime(original_tweet["created_at"], DATETIME_FORMAT)
+        small_tweet["created_at"] = int(dt.timestamp())
 
         # Send these records to two Kafka topics.
         send_json(producer, small_tweet)
