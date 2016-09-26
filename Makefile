@@ -1,4 +1,4 @@
-IMAGE_NAME = memsql_kafka
+CONTAINER_NAME = memsql_kafka
 
 
 .PHONY: build
@@ -7,18 +7,18 @@ build:
 
 .PHONY: rm
 rm:
-	docker rm -f ${IMAGE_NAME}; true
+	docker rm -f ${CONTAINER_NAME}; true
 
 .PHONY: run
 run: build rm
-	docker run --rm --name ${IMAGE_NAME} \
+	docker run --rm --name ${CONTAINER_NAME} \
 		-p 2181:2181 -p 9092:9092 \
 		memsql/kafka
 
 .PHONY: run-with-twitter
 run-with-twitter: build rm
 	. secrets.env && \
-		docker run --rm --name ${IMAGE_NAME} \
+		docker run --rm --name ${CONTAINER_NAME} \
 		-p 2181:2181 -p 9092:9092 \
 		-e PRODUCE_TWITTER=1 \
 		-e TWITTER_CONSUMER_KEY \
