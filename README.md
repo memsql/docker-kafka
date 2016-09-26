@@ -17,9 +17,9 @@ in the same container. This means:
 When not to use this image
 --------------------------
 
-* Don't use this image for any production workload, it is for
-  development/testing purposes only
-* If you want more than one Kafka broker this image won't work very easily
+* Don't use this image for any production workload; this is for
+  development and testing purposes only.
+* If you want more than one Kafka broker, this image won't work very easily.
 
 Run
 ---
@@ -47,15 +47,23 @@ Make sure that those Twitter secrets are in your environment.
 The Twitter producer writes to two topics:
 `tweets-json` and `tweets-tsv`. See `kafka/scripts/producer.py`.
 
+To print records as they are inserted into a given topic:
+
+```bash
+docker exec -it memsql_kafka /bin/bash -c \
+    '$KAFKA_HOME/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic <TOPIC>'
+```
+
 Networking FAQ
 --------------
 
 Docker networking doesn't always play nicely with Kafka since Kafka must know
-which host it should advertise.  Depending on the scenario you may need to set
-the environment variable `ADVERTISED_HOST` when starting the container.  If you
-are using the config included with this repo as-is, it will work with the
-memsql-quickstart container out of the box.  Just specify the container ip when
-setting up your pipeline.
+which hostname it should advertise.  Depending on the scenario, you may need to
+set the environment variable `ADVERTISED_HOST` when starting the container.  If
+you are using the config included with this repo as-is, it will work with the
+memsql-quickstart container out of the box.  Just make sure that in the
+memsql-quickstart schema file, the CREATE PIPELINE statement uses the correct
+IP.
 
 Build from Source
 -----------------

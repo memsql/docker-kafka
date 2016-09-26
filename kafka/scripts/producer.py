@@ -112,26 +112,19 @@ def run():
         # hopefully filter them out.
         if line is None or "retweet_count" not in line:
             continue
-
-        # There are two kinds of tweet messages: retweets, and original tweets.
-        # Retweets contain the original tweet as sub-JSON objects. The original
-        # tweet is more interesting (e.g. it has a higher retweet count), so if
-        # we receive a retweet, we use the data from the original tweet.
-        if "retweeted_status" in line:
-            original_tweet = line["retweeted_status"]
         else:
-            original_tweet = line
+            tweet = line
 
         # Strip down the tweet to the essentials, to reduce the outbound network
         # usage of Public Kafka.
         keys_to_keep = [
             "favorite_count", "id", "retweet_count", "text"
         ]
-        small_tweet = {k: original_tweet[k] for k in keys_to_keep}
-        small_tweet["username"] = original_tweet["user"]["screen_name"]
+        small_tweet = {k: tweet[k] for k in keys_to_keep}
+        small_tweet["username"] = tweet["user"]["screen_name"]
 
         # Include the tweet datetime as a Unix timestamp.
-        dt = datetime.strptime(original_tweet["created_at"], DATETIME_FORMAT)
+        dt = datetime.strptime(tweet["created_at"], DATETIME_FORMAT)
         small_tweet["created_at"] = int(dt.timestamp())
 
         # Send these records to two Kafka topics.
