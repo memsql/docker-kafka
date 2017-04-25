@@ -26,7 +26,7 @@ TWITTER_CONSUMER_SECRET = safe_getenv("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = safe_getenv("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_SECRET = safe_getenv("TWITTER_ACCESS_SECRET")
 
-KEYWORDS_TO_TRACK = ["hillary", "trump"]
+KEYWORDS_TO_TRACK = ["hawks", "celtics", "nets", "hornets", "bulls", "cavaliers", "mavericks", "nuggets", "pistons", "warriors", "rockets", "pacers", "clippers", "lakers", "grizzlies", "heat", "bucks", "timberwolves", "pelicans", "knicks", "thunder", "magic", "sixers", "suns", "blazers", "kings", "spurs", "raptors", "jazz", "wizards"]
 DATETIME_FORMAT = "%a %b %d %H:%M:%S %z %Y"
 
 
