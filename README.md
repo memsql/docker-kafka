@@ -44,6 +44,13 @@ docker run --rm --name memsql_kafka \
 
 Make sure that those Twitter secrets are in your environment.
 
+```
+export TWITTER_CONSUMER_KEY=TODO;
+export TWITTER_CONSUMER_SECRET=TODO;
+export TWITTER_ACCESS_TOKEN=TODO;
+export TWITTER_ACCESS_SECRET=TODO;
+```
+
 The Twitter producer writes to two topics:
 `tweets-json` and `tweets-tsv`. See `kafka/scripts/producer.py`.
 
@@ -73,5 +80,5 @@ make build
 make run
 ```
 
-Or, use `make run-with-twitter`. See Makefile for how it pulls in Twitter
-credentials.
+Or, use `make run-with-twitter`. Make sure you have have the correct env
+variables in place when pulling from Twitter.
