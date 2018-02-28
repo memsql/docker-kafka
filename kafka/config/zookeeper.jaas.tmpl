@@ -1,0 +1,9 @@
+Server { 
+  com.sun.security.auth.module.Krb5LoginModule required
+  refreshKrb5Config=true
+  useKeyTab=true
+  useTicketCache=true
+  keyTab="/etc/krb5.keytab"
+  storeKey=true
+  principal="zookeeper/localhost@EXAMPLE.COM"; 
+};

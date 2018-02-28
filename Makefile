@@ -2,12 +2,46 @@ CONTAINER_NAME = memsql_kafka
 
 
 .PHONY: build
-build:
+build: build-kafka build-kafka-with-saml build-kafka-with-saml-aio
+
+build-kafka:
 	docker build -t memsql/kafka ./kafka
 
+build-kafka-with-saml:
+	docker build -t memsql/kafka_saml -f ./kafka/Dockerfile.saml ./kafka
+
+build-kafka-with-saml-aio:
+	docker build -t memsql/kafka_saml_aio -f ./kafka/Dockerfile.saml.aio ./kafka
+
 .PHONY: rm
-rm:
+rm: rm-kafka rm-kafka-with-saml rm-kafka-with-saml-aio
+
+.PHONY: rm-kafka
+rm-kafka:
 	docker rm -f ${CONTAINER_NAME}; true
+
+.PHONY: rm-kafka-with-saml
+rm-kafka-with-saml:
+	docker rm -f ${CONTAINER_NAME}_saml; true
+
+.PHONY: rm-kafka-with-saml-aio
+rm-kafka-with-saml-aio:
+	docker rm -f ${CONTAINER_NAME}_saml_aio; true
+
+.PHONY: rmimages
+rmimages: rmi-kafka-saml rmi-kafka rmi-kafka-saml-aio
+
+.PHONY: rmi-kafka
+rmi-kafka: 
+	docker rmi -f memsql/kafka; true
+
+.PHONY: rmi-kafka-saml
+rmi-kafka-saml: 
+	docker rmi -f memsql/kafka_saml:latest; true
+
+.PHONY: rmi-kafka-saml-aio
+rmi-kafka-saml-aio: 
+	docker rmi -f memsql/kafka_saml_aio:latest; true
 
 .PHONY: logs
 logs:
