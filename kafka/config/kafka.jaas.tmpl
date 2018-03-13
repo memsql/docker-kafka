@@ -1,10 +1,10 @@
-KafkaServer { 
+KafkaServer {
   com.sun.security.auth.module.Krb5LoginModule required
   refreshKrb5Config=true
   useKeyTab=true
   keyTab="/etc/krb5.keytab"
   storeKey=true
-  principal="zookeeper/localhost@EXAMPLE.COM"; 
+  principal="kafka/host.example.com@EXAMPLE.COM";
 }; 
 
 Client { 

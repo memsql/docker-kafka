@@ -1,0 +1,93 @@
+# Kafka and Zookeeper
+
+FROM java:openjdk-8-jre
+FROM ubuntu:16.04
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV SCALA_VERSION 2.11
+ENV KAFKA_VERSION 0.10.2.1
+ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
+
+# Install Kafka, Zookeeper and other needed things
+RUN apt-get update --fix-missing && \
+    apt-get install -y dnsutils git python3 python3-pip supervisor wget zookeeper krb5-user && \
+    apt-get install -y vim net-tools && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean && \
+    wget -q http://apache.mirrors.spacedump.net/kafka/"$KAFKA_VERSION"/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -O /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
+    tar xfz /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -C /opt && \
+    rm /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz
+
+RUN apt-get -y update
+
+RUN echo package heimdal/realm string EXAMPLE.COM | debconf-set-selections
+RUN apt-get -y install heimdal-kdc heimdal-clients libsasl2-modules-gssapi-heimdal && \
+    apt-get clean
+
+EXPOSE  88
+
+# Create keytab folder.
+RUN mkdir /etc/docker-kdc
+
+# Add kerberos principal/s.
+RUN kadmin -l add --password=herbert --use-defaults memsql/host.example.com@EXAMPLE.COM && \
+    kadmin -l add --password=herbert --use-defaults user1@EXAMPLE.COM && \
+    kadmin -l add --password=tuna    --use-defaults user2@EXAMPLE.COM && \
+    kadmin -l add --password=zookeeper --use-defaults zookeeper/host.example.com@EXAMPLE.COM && \
+    kadmin -l add --password=kafka --use-defaults kafka/host.example.com@EXAMPLE.COM && \
+    kadmin -l add --password=zookeeper --use-defaults zookeeper/localhost@EXAMPLE.COM && \
+    kadmin -l add --password=kafka --use-defaults kafka/localhost@EXAMPLE.COM
+
+# Export keytab.
+RUN kadmin -l ext_keytab -k /etc/docker-kdc/krb5.keytab memsql/host.example.com@EXAMPLE.COM user1@EXAMPLE.COM user2@EXAMPLE.COM zookeeper/host.example.com@EXAMPLE.COM kafka/host.example.com@EXAMPLE.COM kafka/localhost@EXAMPLE.COM zookeeper/localhost@EXAMPLE.COM
+
+ADD config/log4j.properties config/zookeeper.jaas.tmpl config/kafka.jaas.tmpl "$KAFKA_HOME"/config/
+
+# setting up an ssh context 
+
+COPY utils /opt/utils
+
+RUN cp -p /opt/utils/krb5.conf /etc/krb5.conf
+RUN cp -p /etc/docker-kdc/krb5.keytab /etc/krb5.keytab
+
+RUN mkdir /var/run/sshd
+
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+
+# Use a known SSH key - the one we use for psyduck containers
+COPY authorized_keys /root/.ssh/authorized_keys
+
+RUN apt-get install -y openssh-server && \
+    apt-get clean && \
+    sed -r -i "s/^(Port )22/\1 2122/g" /etc/ssh/sshd_config
+
+# We need to test for time-skew so bundle/compile libfaketime because Docker can't
+# change time from host containers.
+RUN git clone https://github.com/wolfcw/libfaketime.git /tmp/libfaketime
+
+# Change to a specific HASH to avoid potential future issues.
+RUN cd /tmp/libfaketime && git reset --hard 57b098c98ab746f6eb1ecf9683b0dfc498fdf2bd && make
+
+# Install Python packages for the producer script.
+RUN pip3 install git+git://github.com/bear/python-twitter.git@3f99eaf06a6a9862cd6957e33072165f7ab50c86
+RUN pip3 install git+git://github.com/dpkp/kafka-python.git@00dd2c7409b1dbb71d2a2898c86b2d0c8f6905c4
+
+ADD scripts /scripts
+
+RUN mkdir -p /var/private/ssl && \
+    cd /var/private/ssl && \
+    /scripts/gen-ssl-certs.sh ca ca-cert US && \
+    /scripts/gen-ssl-certs.sh -k server ca-cert broker_localhost_ localhost && \
+    /scripts/gen-ssl-certs.sh client ca-cert client_memsql_ memsql
+
+# Supervisor config
+ADD supervisor/kafka-aio.conf /etc/supervisor/conf.d/
+ADD supervisor/kdc.conf /etc/supervisor/conf.d/
+ADD supervisor/zookeeper.conf /etc/supervisor/conf.d/
+ADD supervisor/producer.conf /etc/supervisor/conf.d/
+ADD supervisor/sshd.conf /etc/supervisor/conf.d/
+
+# 2122 is SSH, 2181 is zookeeper, 9092-9099 is kafka (for different listeners like SSL, INTERNAL, PLAINTEXT etc.)
+EXPOSE 2122 2181 9092 9093 9094 9095 9096 9097 9098 9099
+
+CMD ["/scripts/start.sh"]

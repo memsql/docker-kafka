@@ -13,8 +13,11 @@ build-kafka-with-saml:
 build-kafka-with-saml-aio:
 	docker build -t memsql/kafka_saml_aio -f ./kafka/Dockerfile.saml.aio ./kafka
 
+build-kafka-aio:
+	docker build -t memsql/kafka_aio -f ./kafka/Dockerfile.aio ./kafka
+
 .PHONY: rm
-rm: rm-kafka rm-kafka-with-saml rm-kafka-with-saml-aio
+rm: rm-kafka rm-kafka-with-saml rm-kafka-with-saml-aio rm-kafka-aio
 
 .PHONY: rm-kafka
 rm-kafka:
@@ -27,6 +30,10 @@ rm-kafka-with-saml:
 .PHONY: rm-kafka-with-saml-aio
 rm-kafka-with-saml-aio:
 	docker rm -f ${CONTAINER_NAME}_saml_aio; true
+
+.PHONY: rm-kafka-aio
+rm-kafka-aio:
+	docker rm -f ${CONTAINER_NAME}_aio; true
 
 .PHONY: rmimages
 rmimages: rmi-kafka-saml rmi-kafka rmi-kafka-saml-aio
@@ -42,6 +49,10 @@ rmi-kafka-saml:
 .PHONY: rmi-kafka-saml-aio
 rmi-kafka-saml-aio: 
 	docker rmi -f memsql/kafka_saml_aio:latest; true
+
+.PHONY: rmi-kafka-aio
+rmi-kafka-aio:
+	docker rmi -f memsql/kafka_aio:latest; true
 
 .PHONY: logs
 logs:
