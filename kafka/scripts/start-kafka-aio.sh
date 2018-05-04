@@ -30,9 +30,9 @@ LISTENERS="PLAINTEXT:\/\/${HOSTNAME}:9092,SSL:\/\/${HOSTNAME}:9093,SASL_PLAINTEX
 ADVERTISED_LISTENERS="PLAINTEXT:\/\/host.example.com:9092,SSL:\/\/host.example.com:9093,SASL_PLAINTEXT:\/\/host.example.com:9094,SASL_SSL:\/\/host.example.com:9095"
 echo "set listener ports for: PLAINTEXT,SSL,SASL_PLAINTEXT,SASL_SSL"
 if grep -r -q "^#\?listeners=" ${KAFKA_HOME}/config/server.properties; then
-    sed -r -i "s/#?(listeners)=(.*)/\1=${LISTENERS}/g" ${KAFKA_HOME}/config/server.properties
+    sed -r -i "s/#?(listeners)=(.*)/\1=${ADVERTISED_LISTENERS}/g" ${KAFKA_HOME}/config/server.properties
 else
-    echo "listeners=${LISTENERS}" >> ${KAFKA_HOME}/config/server.properties
+    echo "listeners=${ADVERTISED_LISTENERS}" >> ${KAFKA_HOME}/config/server.properties
 fi
 
 if grep -r -q "^#\?advertised.listeners=" ${KAFKA_HOME}/config/server.properties; then
@@ -41,7 +41,7 @@ else
     echo "advertised.listeners=${ADVERTISED_LISTENERS}" >> ${KAFKA_HOME}/config/server.properties
 fi
 
-echo "$HOSTNAME  host.example.com" >> /etc/hosts
+echo "${HOSTNAME} host.example.com" >> /etc/hosts
 
 echo "set SSL options"
 if grep -r -q "^#\?ssl.client.auth=" ${KAFKA_HOME}/config/server.properties; then
@@ -51,9 +51,9 @@ else
     echo "ssl.protocol=TLS" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.enabled.protocols=TLSv1.2,TLSv1.1,TLSv1" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.client.auth = required" >> ${KAFKA_HOME}/config/server.properties
-    echo "ssl.truststore.location=/var/private/ssl/broker_localhost_server.truststore.jks" >> ${KAFKA_HOME}/config/server.properties
+    echo "ssl.truststore.location=/var/private/ssl/broker_host.example.com_server.truststore.jks" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.truststore.password=abcdefgh" >> ${KAFKA_HOME}/config/server.properties
-    echo "ssl.keystore.location=/var/private/ssl/broker_localhost_server.keystore.jks" >> ${KAFKA_HOME}/config/server.properties
+    echo "ssl.keystore.location=/var/private/ssl/broker_host.example.com_server.keystore.jks" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.keystore.password=abcdefgh" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.key.password=abcdefgh" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.keystore.type = JKS" >> ${KAFKA_HOME}/config/server.properties
@@ -75,7 +75,7 @@ fi
 if [ ! -z "$ADVERTISED_HOST" ]; then
     echo "advertised host: $ADVERTISED_HOST"
     if grep -r -q "^#\?advertised.host.name=" ${KAFKA_HOME}/config/server.properties; then
-        sed -r -i "s/#?(advertised.host.name=)=(.*)/\1=${ADVERTISED_HOST}" ${KAFKA_HOME}/config/server.properties
+        sed -r -i "s/#?(advertised.host.name=)=(.*)/\1=${ADVERTISED_HOST}/g" ${KAFKA_HOME}/config/server.properties
     else
         echo "advertised.host.name=$ADVERTISED_HOST" >> $KAFKA_HOME/config/server.properties
     fi

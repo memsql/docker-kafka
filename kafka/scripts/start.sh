@@ -13,7 +13,7 @@ if [ ! -z "$LOG_RETENTION_HOURS" ]; then
     export LOG_RETENTION_HOURS=12
 fi
 if [ ! -z "$NUM_PARTITIONS" ]; then
-    export NUM_PARTITIONS=2
+    export NUM_PARTITIONS=16
 fi
 
 exec /usr/bin/supervisord -n

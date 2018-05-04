@@ -72,13 +72,18 @@ RUN cd /tmp/libfaketime && git reset --hard 57b098c98ab746f6eb1ecf9683b0dfc498fd
 RUN pip3 install git+git://github.com/bear/python-twitter.git@3f99eaf06a6a9862cd6957e33072165f7ab50c86
 RUN pip3 install git+git://github.com/dpkp/kafka-python.git@00dd2c7409b1dbb71d2a2898c86b2d0c8f6905c4
 
+ENV NUM_PARTITIONS 16
+
 ADD scripts /scripts
 
 RUN mkdir -p /var/private/ssl && \
     cd /var/private/ssl && \
     /scripts/gen-ssl-certs.sh ca ca-cert US && \
-    /scripts/gen-ssl-certs.sh -k server ca-cert broker_localhost_ localhost && \
+    /scripts/gen-ssl-certs.sh -k server ca-cert broker_host.example.com_ host.example.com && \
     /scripts/gen-ssl-certs.sh client ca-cert client_memsql_ memsql
+
+RUN apt-get -y install heimdal-clients libsasl2-modules libsasl2-modules-gssapi-heimdal && \
+    apt-get clean
 
 # Supervisor config
 ADD supervisor/kafka-aio.conf /etc/supervisor/conf.d/
