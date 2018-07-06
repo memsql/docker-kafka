@@ -37,8 +37,11 @@ CN="$HOST"
 # Password
 PASS="abcdefgh"
 
+echo "Current date"
+date
+
 # Cert validity, in days
-VALIDITY=10000
+VALIDITY=100000
 
 set -e
 

@@ -114,6 +114,10 @@ if [ ! -z "$NUM_PARTITIONS" ]; then
     sed -r -i "s/(num.partitions)=(.*)/\1=$NUM_PARTITIONS/g" $KAFKA_HOME/config/server.properties
 fi
 
+# Stop Kafka first
+$KAFKA_HOME/bin/kafka-server-stop.sh $KAFKA_HOME/config/server.properties || true
+sleep 2
+
 # Run Kafka
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
 
