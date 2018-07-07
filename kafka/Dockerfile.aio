@@ -76,11 +76,7 @@ ENV NUM_PARTITIONS 16
 
 ADD scripts /scripts
 
-RUN mkdir -p /var/private/ssl && \
-    cd /var/private/ssl && \
-    /scripts/gen-ssl-certs.sh ca ca-cert US && \
-    /scripts/gen-ssl-certs.sh -k server ca-cert broker_host.example.com_ host.example.com && \
-    /scripts/gen-ssl-certs.sh client ca-cert client_memsql_ memsql
+RUN mkdir -p /var/private/ssl
 
 RUN apt-get -y install heimdal-clients libsasl2-modules libsasl2-modules-gssapi-heimdal && \
     apt-get clean
