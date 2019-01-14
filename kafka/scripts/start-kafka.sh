@@ -57,6 +57,12 @@ if [ ! -z "$NUM_PARTITIONS" ]; then
     sed -r -i "s/(num.partitions)=(.*)/\1=$NUM_PARTITIONS/g" $KAFKA_HOME/config/server.properties
 fi
 
+# Configure topic auto-creation
+if [ ! -z "$AUTO_CREATE" ]; then
+    echo "setting auto-create to: $AUTO_CREATE"
+    sed -r -i "s/(auto.create.topics.enable)=(.*)/\1=$AUTO_CREATE/g" $KAFKA_HOME/config/server.properties
+fi
+
 # Run Kafka
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
 
