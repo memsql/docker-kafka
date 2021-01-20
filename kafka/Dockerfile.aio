@@ -2,23 +2,21 @@
 
 FROM java:openjdk-8-jre
 FROM ubuntu:16.04
+FROM psy3.memcompute.com/confluentinc/cp-schema-registry:5.5.1
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV SCALA_VERSION 2.11
-ENV KAFKA_VERSION 0.10.2.1
+ENV SCALA_VERSION 2.12
+ARG KAFKA_VERSION_ARG=2.7.0
+ENV KAFKA_VERSION=$KAFKA_VERSION_ARG
 ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
 
-# Install Kafka, Zookeeper and other needed things
-RUN apt-get update --fix-missing && \
-    apt-get install -y dnsutils git python3 python3-pip supervisor wget zookeeper krb5-user && \
-    apt-get install -y vim net-tools && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean && \
-    wget -q http://apache.mirrors.spacedump.net/kafka/"$KAFKA_VERSION"/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -O /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz && \
-    tar xfz /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -C /opt && \
-    rm /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz
+ADD scripts /scripts
 
-RUN apt-get -y update
+RUN /scripts/install-apt-libs.sh
+RUN /scripts/install-python3.5.sh
+
+RUN pip3 install git+git://github.com/bear/python-twitter.git@3f99eaf06a6a9862cd6957e33072165f7ab50c86
+RUN pip3 install git+git://github.com/dpkp/kafka-python.git
 
 RUN echo package heimdal/realm string EXAMPLE.COM | debconf-set-selections
 RUN apt-get -y install heimdal-kdc heimdal-clients libsasl2-modules-gssapi-heimdal && \
@@ -68,13 +66,7 @@ RUN git clone https://github.com/wolfcw/libfaketime.git /tmp/libfaketime
 # Change to a specific HASH to avoid potential future issues.
 RUN cd /tmp/libfaketime && git reset --hard 57b098c98ab746f6eb1ecf9683b0dfc498fdf2bd && make
 
-# Install Python packages for the producer script.
-RUN pip3 install git+git://github.com/bear/python-twitter.git@3f99eaf06a6a9862cd6957e33072165f7ab50c86
-RUN pip3 install git+git://github.com/dpkp/kafka-python.git@00dd2c7409b1dbb71d2a2898c86b2d0c8f6905c4
-
 ENV NUM_PARTITIONS 16
-
-ADD scripts /scripts
 
 RUN mkdir -p /var/private/ssl
 
@@ -89,6 +81,7 @@ ADD supervisor/producer.conf /etc/supervisor/conf.d/
 ADD supervisor/sshd.conf /etc/supervisor/conf.d/
 
 # 2122 is SSH, 2181 is zookeeper, 9092-9099 is kafka (for different listeners like SSL, INTERNAL, PLAINTEXT etc.)
-EXPOSE 2122 2181 9092 9093 9094 9095 9096 9097 9098 9099
+# 8081 is the schema registry
+EXPOSE 2122 2181 9092 9093 9094 9095 9096 9097 9098 9099 8081
 
 CMD ["/scripts/start.sh"]

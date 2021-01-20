@@ -1,25 +1,32 @@
 CONTAINER_NAME = memsql_kafka
 
+# Consume KAFKA_VERSION from the make environment.
+#
+ifeq ($(KAFKA_VERSION),)
+DOCKERARGS := 
+else
+DOCKERARGS := --build-arg KAFKA_VERSION_ARG=${KAFKA_VERSION}
+endif
 
 .PHONY: build
 build: build-kafka build-kafka-with-saml build-kafka-with-saml-aio
 
 build-kafka:
-	docker build -t memsql/kafka ./kafka
+	docker build ${DOCKERARGS} -t memsql/kafka ./kafka
 
 build-kafka-with-saml:
-	docker build -t memsql/kafka_saml -f ./kafka/Dockerfile.saml ./kafka
+	docker build ${DOCKERARGS} -t memsql/kafka_saml -f ./kafka/Dockerfile.saml ./kafka
 
 build-kafka-with-saml-aio:
-	docker build -t memsql/kafka_saml_aio -f ./kafka/Dockerfile.saml.aio ./kafka
+	docker build ${DOCKERARGS} -t memsql/kafka_saml_aio -f ./kafka/Dockerfile.saml.aio ./kafka
 
 .PHONY: build-kafka-aio
 build-kafka-aio:
-	docker build -t memsql/kafka_aio -f ./kafka/Dockerfile.aio ./kafka
+	docker build ${DOCKERARGS} -t memsql/kafka_aio -f ./kafka/Dockerfile.aio ./kafka
 
 .PHONY: build-kafka-no-auto-create
 build-kafka-no-auto-create: build-kafka-aio
-	docker build -t memsql/kafka_aio_no_auto_create -f ./kafka/Dockerfile.aio.no.auto ./kafka
+	docker build ${DOCKERARGS} -t memsql/kafka_aio_no_auto_create -f ./kafka/Dockerfile.aio.no.auto ./kafka
 
 .PHONY: rm
 rm: rm-kafka rm-kafka-with-saml rm-kafka-with-saml-aio rm-kafka-aio
