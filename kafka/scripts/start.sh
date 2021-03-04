@@ -2,9 +2,7 @@
 
 mkdir -p /var/private/ssl && \
     cd /var/private/ssl && \
-    /scripts/gen-ssl-certs.sh ca ca-cert US && \
-    /scripts/gen-ssl-certs.sh -k server ca-cert broker_host.example.com_ host.example.com && \
-    /scripts/gen-ssl-certs.sh client ca-cert client_memsql_ memsql
+    /scripts/gen-ssl-certs.sh
 
 if [ "$PRODUCE_TWITTER" != 1 ]; then
     rm /etc/supervisor/conf.d/producer.conf
