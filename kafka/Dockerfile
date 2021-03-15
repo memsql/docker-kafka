@@ -4,7 +4,8 @@ FROM java:openjdk-8-jre
 FROM psy3.memcompute.com/confluentinc/cp-schema-registry:5.5.1
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV SCALA_VERSION 2.12
+ARG SCALA_VERSION_ARG=2.12
+ENV SCALA_VERSION=$SCALA_VERSION_ARG
 ARG KAFKA_VERSION_ARG=2.7.0
 ENV KAFKA_VERSION=$KAFKA_VERSION_ARG
 ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
@@ -13,10 +14,9 @@ ENV NUM_PARTITIONS 16
 ADD scripts /scripts
 
 RUN /scripts/install-apt-libs.sh
-RUN /scripts/install-python3.5.sh
-
-RUN pip3 install git+git://github.com/bear/python-twitter.git@3f99eaf06a6a9862cd6957e33072165f7ab50c86
 RUN pip3 install git+git://github.com/dpkp/kafka-python.git
+
+RUN /scripts/install-kafka.sh
 
 # setup ssh
 RUN mkdir /var/run/sshd

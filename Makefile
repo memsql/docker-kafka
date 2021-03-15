@@ -8,6 +8,10 @@ else
 DOCKERARGS := --build-arg KAFKA_VERSION_ARG=${KAFKA_VERSION}
 endif
 
+ifneq ($(SCALA_VERSION),)
+DOCKERARGS := ${DOCKERARGS} --build-arg SCALA_VERSION_ARG=${SCALA_VERSION}
+endif
+
 .PHONY: build
 build: build-kafka build-kafka-with-saml build-kafka-with-saml-aio
 

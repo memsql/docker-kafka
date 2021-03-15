@@ -11,6 +11,9 @@ set -ex pipefail
 # * NUM_PARTITIONS: configure the default number of log partitions per topic
 # * SECURITY_PROTOCOL_MAP: mapping from the listener names to security protocol
 
+# Add a new line,if the last line of the file is a configuration and not an empoty line, appending will clobber the line
+echo "" >> $KAFKA_HOME/config/server.properties
+
 echo "set SASL mechanism"
 if grep -r -q "^#\?sasl.enabled.mechanisms" ${KAFKA_HOME}/config/server.properties; then
     sed -r -i "s/#?(sasl.enabled.mechanisms)=(.*)/\1=GSSAPI,PLAIN/g" ${KAFKA_HOME}/config/server.properties
