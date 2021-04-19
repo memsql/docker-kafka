@@ -10,12 +10,12 @@ if [[ -n $1 ]]; then
         echo ""
         exit
     fi
-    build_version=".$1"
+    build_version="$1"
     echo "build_version: $build_version"
 fi
 
 build_and_tag () {
-    image_version="${KAFKA_VERSION}${build_version}"
+    image_version="${KAFKA_VERSION}.${build_version}"
     make build-kafka
     docker tag memsql/kafka:latest "psy3.memcompute.com/schema_kafka:$image_version"
     
@@ -24,6 +24,9 @@ build_and_tag () {
         docker tag memsql/kafka_aio:latest "psy3.memcompute.com/schema_kafka-aio:$image_version"
     fi
 }
+
+export BASE_VERSION=$build_version
+make build-kafka-base
 
 # kafka 0.8 doesnt support saml and does not need an aio image
 dont_build_aio=1

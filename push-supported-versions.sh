@@ -9,14 +9,14 @@ if [[ -n $1 ]]; then
         echo ""
         exit
     fi
-    build_version=".$1"
+    build_version="$1"
 else
     echo "please set the build version"
     exit 1
 fi
 
 push_image () {
-    image_version="${1}${build_version}"
+    image_version="${1}.${build_version}"
     docker push "psy3.memcompute.com/schema_kafka:$image_version"
     
     if [ -z "${dont_push_aio+set}" ]; then

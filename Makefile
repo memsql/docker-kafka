@@ -12,20 +12,35 @@ ifneq ($(SCALA_VERSION),)
 DOCKERARGS := ${DOCKERARGS} --build-arg SCALA_VERSION_ARG=${SCALA_VERSION}
 endif
 
-.PHONY: build
-build: build-kafka build-kafka-with-saml build-kafka-with-saml-aio
+ifeq ($(BASE_VERSION),)
+# Set the base image version to be latest
+BASE_IMAGE_VERSION := latest
+# When BASE_VERSION is not set, do not include the build-kafka-base dependency
+REQ := build-kafka-base
+else
+BASE_IMAGE_VERSION := ${BASE_VERSION}
+endif
 
-build-kafka:
+DOCKERARGS := ${DOCKERARGS} --build-arg BASE_IMAGE=memsql/kafka_base:${BASE_IMAGE_VERSION}
+
+.PHONY: build
+build: build-kafka build-kafka-aio build-kafka-with-saml build-kafka-with-saml-aio
+
+build-kafka-base: 
+	docker build -t memsql/kafka_base:${BASE_IMAGE_VERSION} -f ./kafka/Dockerfile.base ./kafka
+
+build-kafka: ${REQ}
+	echo ${DOCKERARGS}
 	docker build ${DOCKERARGS} -t memsql/kafka ./kafka
 
-build-kafka-with-saml:
+build-kafka-with-saml: ${REQ}
 	docker build ${DOCKERARGS} -t memsql/kafka_saml -f ./kafka/Dockerfile.saml ./kafka
 
-build-kafka-with-saml-aio:
+build-kafka-with-saml-aio: ${REQ}
 	docker build ${DOCKERARGS} -t memsql/kafka_saml_aio -f ./kafka/Dockerfile.saml.aio ./kafka
 
 .PHONY: build-kafka-aio
-build-kafka-aio:
+build-kafka-aio: ${REQ}
 	docker build ${DOCKERARGS} -t memsql/kafka_aio -f ./kafka/Dockerfile.aio ./kafka
 
 .PHONY: build-kafka-no-auto-create

@@ -1,0 +1,42 @@
+FROM java:openjdk-8-jre
+FROM ubuntu:16.04
+FROM psy3.memcompute.com/confluentinc/cp-schema-registry:5.5.1
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV NUM_PARTITIONS 16
+
+ADD scripts /scripts
+
+RUN echo "deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/jessie-backports.list
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AA8E81B4331F7F50
+
+# Install Kafka, Zookeeper, python dependencies and other needed things
+RUN apt-get -o Acquire::Check-Valid-Until=false update --fix-missing && \
+    apt-get install -y python3 python3-pip dnsutils git supervisor wget zookeeper build-essential libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev&& \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean 
+
+RUN apt-get -y -o Acquire::Check-Valid-Until=false update
+
+RUN pip3 install git+git://github.com/dpkp/kafka-python.git
+
+# setup ssh
+RUN mkdir /var/run/sshd
+
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+
+# Use a known SSH key - the one we use for psyduck containers
+COPY authorized_keys /root/.ssh/authorized_keys
+
+RUN apt-get -o Acquire::Check-Valid-Until=false update && \
+    apt-get install -y ssh openssh-server && \
+    apt-get clean && \
+    sed -r -i "s/^(Port )22/\1 2122/g" /etc/ssh/sshd_config
+
+# Supervisor config
+ADD supervisor/producer.conf /etc/supervisor/conf.d/
+ADD supervisor/zookeeper.conf /etc/supervisor/conf.d/
+ADD supervisor/sshd.conf /etc/supervisor/conf.d/
+
+# make image compatible with old way of starting kafka
+RUN ln -s /scripts/start.sh /startup.sh
