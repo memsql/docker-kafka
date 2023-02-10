@@ -16,12 +16,18 @@ fi
 
 build_and_tag () {
     image_version="${KAFKA_VERSION}.${build_version}"
+
     make build-kafka
-    docker tag memsql/kafka:latest "psy3.memcompute.com/schema_kafka:$image_version"
-    
-    if [ -z "${dont_build_aio+set}" ]; then
+    docker tag memsql/kafka:latest "psy3.memcompute.com/schema_kafka:${image_version}"
+
+    if [[ "$*" == *"aio"* ]]; then
         make build-kafka-aio
-        docker tag memsql/kafka_aio:latest "psy3.memcompute.com/schema_kafka-aio:$image_version"
+        docker tag memsql/kafka_aio:latest "psy3.memcompute.com/schema_kafka-aio:${image_version}"
+    fi
+
+    if [[ "$*" == *"oauth"* ]]; then
+        make build-kafka-oauth
+        docker tag memsql/kafka_oauth:latest "psy3.memcompute.com/schema_kafka-oauth:${image_version}"
     fi
 }
 
@@ -29,32 +35,34 @@ export BASE_VERSION=$build_version
 make build-kafka-base
 
 # kafka 0.8 doesnt support saml and does not need an aio image
-dont_build_aio=1
 export KAFKA_VERSION=0.8.2.1
 export SCALA_VERSION=2.10
 build_and_tag
-unset dont_build_aio
 
 export KAFKA_VERSION=0.10.2.1
 export SCALA_VERSION=2.10
-build_and_tag
+build_and_tag aio
 
 export KAFKA_VERSION=0.11.0.2
 export SCALA_VERSION=2.11
-build_and_tag
+build_and_tag aio
 
 export KAFKA_VERSION=1.0.1
 export SCALA_VERSION=2.11
-build_and_tag
+build_and_tag aio
 
 export KAFKA_VERSION=1.1.0
 export SCALA_VERSION=2.11
-build_and_tag
+build_and_tag aio
 
 export KAFKA_VERSION=2.0.0
 export SCALA_VERSION=2.11
-build_and_tag
+build_and_tag aio
 
 export KAFKA_VERSION=2.7.0
 export SCALA_VERSION=2.12
-build_and_tag
+build_and_tag aio
+
+export KAFKA_VERSION=3.3.1
+export SCALA_VERSION=2.13
+build_and_tag oauth

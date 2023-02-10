@@ -47,8 +47,12 @@ build-kafka-aio: ${REQ}
 build-kafka-no-auto-create: build-kafka-aio
 	docker build ${DOCKERARGS} -t memsql/kafka_aio_no_auto_create -f ./kafka/Dockerfile.aio.no.auto ./kafka
 
+.PHONY: build-kafka-oauth
+build-kafka-oauth: build-kafka-oauth
+	docker build ${DOCKERARGS} -t memsql/kafka_oauth -f ./kafka/Dockerfile.oauth ./kafka
+
 .PHONY: rm
-rm: rm-kafka rm-kafka-with-saml rm-kafka-with-saml-aio rm-kafka-aio
+rm: rm-kafka rm-kafka-with-saml rm-kafka-with-saml-aio rm-kafka-aio rm-kafka-oauth
 
 .PHONY: rm-kafka
 rm-kafka:
@@ -65,6 +69,10 @@ rm-kafka-with-saml-aio:
 .PHONY: rm-kafka-aio
 rm-kafka-aio:
 	docker rm -f ${CONTAINER_NAME}_aio; true
+
+.PHONY: rm-kafka-oauth
+rm-kafka-oauth:
+	docker rm -f ${CONTAINER_NAME}_oauth; true
 
 .PHONY: rm-kafka-no-auto-create
 rm-kafka-no-auto-create:
@@ -88,6 +96,10 @@ rmi-kafka-saml-aio:
 .PHONY: rmi-kafka-aio
 rmi-kafka-aio:
 	docker rmi -f memsql/kafka_aio:latest; true
+
+.PHONY: rmi-kafka-oauth
+rmi-kafka-oauth:
+	docker rmi -f memsql/kafka_oauth:latest; true
 
 .PHONY: logs
 logs:

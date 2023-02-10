@@ -53,7 +53,6 @@ else
     echo "ssl.client.auth=required" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.protocol=TLS" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.enabled.protocols=TLSv1.2,TLSv1.1,TLSv1" >> ${KAFKA_HOME}/config/server.properties
-    echo "ssl.client.auth = required" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.truststore.location=/var/private/ssl/broker_host.example.com_server.truststore.jks" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.truststore.password=abcdefgh" >> ${KAFKA_HOME}/config/server.properties
     echo "ssl.keystore.location=/var/private/ssl/broker_host.example.com_server.keystore.jks" >> ${KAFKA_HOME}/config/server.properties
