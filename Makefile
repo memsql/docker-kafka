@@ -26,6 +26,7 @@ DOCKERARGS := ${DOCKERARGS} --build-arg BASE_IMAGE=memsql/kafka_base:${BASE_IMAG
 .PHONY: build
 build: build-kafka build-kafka-aio build-kafka-with-saml build-kafka-with-saml-aio
 
+# use --progress=plain --no-cache for debugging
 build-kafka-base: 
 	docker build -t memsql/kafka_base:${BASE_IMAGE_VERSION} -f ./kafka/Dockerfile.base ./kafka
 

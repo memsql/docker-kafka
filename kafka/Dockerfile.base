@@ -4,16 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV NUM_PARTITIONS 16
 
 ADD scripts /scripts
-
-# Install Kafka, Zookeeper, python dependencies and other needed things
-RUN apt-get update --fix-missing && \
-    apt-get install -y --force-yes python3 python3-pip dnsutils git supervisor wget zookeeper build-essential libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev&& \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean 
-
-
-RUN apt-get update
-
+RUN /scripts/install-apt-libs.sh
 RUN pip3 install kafka-python
 
 # setup ssh
@@ -24,8 +15,7 @@ RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
 # Use a known SSH key - the one we use for psyduck containers
 COPY authorized_keys /root/.ssh/authorized_keys
 
-RUN apt-get update && \
-    apt-get install -y --force-yes ssh openssh-server && \
+RUN apt-get -y --force-yes install ssh openssh-server && \
     apt-get clean && \
     sed -r -i "s/^(Port )22/\1 2122/g" /etc/ssh/sshd_config
 
