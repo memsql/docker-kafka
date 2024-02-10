@@ -96,7 +96,11 @@ fi
 # Configure topic auto-creation
 if [ ! -z "$AUTO_CREATE" ]; then
     echo "setting auto-create to: $AUTO_CREATE"
-    sed -r -i "s/(auto.create.topics.enable)=(.*)/\1=$AUTO_CREATE/g" ${CONFIG_PATH}
+    if ! grep -q "^auto.create.topics.enable=" ${CONFIG_PATH}; then
+        echo -e "\nauto.create.topics.enable=$AUTO_CREATE" >> ${CONFIG_PATH}
+    else
+        sed -r -i "s/(auto.create.topics.enable)=(.*)/\1=$AUTO_CREATE/g" ${CONFIG_PATH}
+    fi
 fi
 
 # Run Kafka
