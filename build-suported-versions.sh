@@ -6,7 +6,7 @@ if [[ -n $1 ]]; then
     if [ "$1" = "-h" ]; then
         echo "This script builds the docker images for the supported kafka versions"
         echo "The optional first positional argument specifies the subverion of the docker image used to tag the image"
-        echo "Example: './build-supported-versions.sh 111' will build psy3.memcompute.com/schema_kafka:2.7.0.111"
+        echo "Example: './build-supported-versions.sh 111' will build aws-psyduck-production-ecr-em-proxy.internal.memcompute.com/psyduck/switchman-images/schema_kafka:2.7.0.111"
         echo ""
         exit
     fi
@@ -18,16 +18,16 @@ build_and_tag () {
     image_version="${KAFKA_VERSION}.${build_version}"
 
     make build-kafka
-    docker tag memsql/kafka:latest "psy3.memcompute.com/schema_kafka:${image_version}"
+    docker tag memsql/kafka:latest "aws-psyduck-production-ecr-em-proxy.internal.memcompute.com/psyduck/switchman-images/schema_kafka:${image_version}"
 
     if [[ "$*" == *"aio"* ]]; then
         make build-kafka-aio
-        docker tag memsql/kafka_aio:latest "psy3.memcompute.com/schema_kafka-aio:${image_version}"
+        docker tag memsql/kafka_aio:latest "aws-psyduck-production-ecr-em-proxy.internal.memcompute.com/psyduck/switchman-images/schema_kafka-aio:${image_version}"
     fi
 
     if [[ "$*" == *"oauth"* ]]; then
         make build-kafka-oauth
-        docker tag memsql/kafka_oauth:latest "psy3.memcompute.com/schema_kafka-oauth:${image_version}"
+        docker tag memsql/kafka_oauth:latest "aws-psyduck-production-ecr-em-proxy.internal.memcompute.com/psyduck/switchman-images/schema_kafka-oauth:${image_version}"
     fi
 }
 

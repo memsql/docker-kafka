@@ -5,7 +5,7 @@ if [[ -n $1 ]]; then
     if [ "$1" = "-h" ]; then
         echo "This script pushes the docker images for the supported kafka versions"
         echo "The optional first positional argument specifies the subverion of the docker image to push"
-        echo "Example: './push-supported-versions.sh 111' will build psy3.memcompute.com/schema_kafka:2.7.0.111"
+        echo "Example: './push-supported-versions.sh 111' will aws-psyduck-production-ecr-em-proxy.internal.memcompute.com/psyduck/switchman-images/schema_kafka:2.7.0.111"
         echo ""
         exit
     fi
@@ -17,14 +17,14 @@ fi
 
 push_image () {
     image_version="${1}.${build_version}"
-    docker push "psy3.memcompute.com/schema_kafka:$image_version"
+    docker push "aws-psyduck-production-ecr-em-proxy.internal.memcompute.com/psyduck/switchman-images/schema_kafka:$image_version"
 
     if [[ "$*" == *"aio"* ]]; then
-        docker push "psy3.memcompute.com/schema_kafka-aio:$image_version"
+        docker push "aws-psyduck-production-ecr-em-proxy.internal.memcompute.com/psyduck/switchman-images/schema_kafka-aio:$image_version"
     fi
 
     if [[ "$*" == *"oauth"* ]]; then
-        docker push "psy3.memcompute.com/schema_kafka-oauth:$image_version"
+        docker push "aws-psyduck-production-ecr-em-proxy.internal.memcompute.com/psyduck/switchman-images/schema_kafka-oauth:$image_version"
     fi
 }
 

@@ -11,7 +11,7 @@ ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
 RUN /scripts/install-kafka.sh
 
 RUN echo package heimdal/realm string EXAMPLE.COM | debconf-set-selections
-RUN apt-get -y install heimdal-kdc heimdal-clients libsasl2-modules-gssapi-heimdal && \
+RUN apt-get -y --force-yes install heimdal-kdc heimdal-clients libsasl2-modules-gssapi-heimdal && \
     apt-get clean
 
 EXPOSE  88

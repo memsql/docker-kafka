@@ -50,7 +50,7 @@ RUN cd /tmp/libfaketime && git reset --hard 57b098c98ab746f6eb1ecf9683b0dfc498fd
 
 RUN mkdir -p /var/private/ssl
 
-RUN apt-get -y install heimdal-clients libsasl2-modules libsasl2-modules-gssapi-heimdal && \
+RUN apt-get -y --force-yes install heimdal-clients libsasl2-modules libsasl2-modules-gssapi-heimdal && \
     apt-get clean
 
 # Supervisor config
