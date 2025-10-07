@@ -35,4 +35,4 @@ push_image 1.0.1 aio
 push_image 1.1.0 aio
 push_image 2.0.0 aio
 push_image 2.7.0 aio
-push_image 3.3.1 oauth
+push_image 3.3.2 oauth
