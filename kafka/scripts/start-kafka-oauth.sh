@@ -13,6 +13,7 @@ set -ex pipefail
 
 CONFIG_PATH="${KAFKA_HOME}/config/server.properties"
 HOSTNAME=`hostname -i`
+echo "" >> ${CONFIG_PATH}
 
 # Kafka 3.3.1: The advertised.port and advertised.host.name configurations were removed. Please use advertised.listeners instead.
 LISTENERS="PLAINTEXT:\/\/:9092, SASL_PLAINTEXT:\/\/:9093, SASL_SSL:\/\/:9094"

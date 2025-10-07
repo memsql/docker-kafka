@@ -23,6 +23,27 @@ fi
 PIDS=()
 # Launch the schema registry in the background and tee the results to a log file
 if [ ! -z "$LAUNCH_SCHEMA_REGISTRY" ]; then
+    if [ ! -z "$BASIC_AUTH" ]; then
+        # Enable basic auth
+        export SCHEMA_REGISTRY_AUTHENTICATION_METHOD="BASIC"
+        export SCHEMA_REGISTRY_AUTHENTICATION_ROLES="admin"
+        export SCHEMA_REGISTRY_AUTHENTICATION_REALM="SchemaRegistry-Props"
+
+        echo "SchemaRegistry-Props {
+  org.eclipse.jetty.jaas.spi.PropertyFileLoginModule required
+  file=\"/etc/schema-registry/passwords\"
+  debug=\"false\";
+};" > /etc/schema-registry/jaas_config.conf
+
+        export SCHEMA_REGISTRY_OPTS=-Djava.security.auth.login.config=/etc/schema-registry/jaas_config.conf /usr/bin/schema-registry-start /etc/schema-registry/schema-registry.properties
+
+        # generated using 
+        # bin/schema-registry-run-class org.eclipse.jetty.util.security.Password <username> <password>
+        # see https://docs.confluent.io/platform/current/security/basic-auth.html#basic-auth-sr
+        # for more details
+        echo "billieJean: OBF:1q3a1vv11rvb1x1b1r531s9f1sbv1r2v1x1b1rxj1vu91q5k,admin" > /etc/schema-registry/passwords
+    fi
+
     /etc/confluent/docker/run | tee /var/log/schema-registry.log &
     PIDS+=($!)
 else

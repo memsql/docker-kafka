@@ -8,8 +8,24 @@ date
 VALIDITY=100000
 
 set -e
+
+# Create client key and CSR
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -aes-256-cbc -pass pass:"$PASS" -out client.key
+openssl req -new -key client.key -passin pass:"$PASS" -subj "/C=US/ST=Denial/L=Seattle/O=NSA/CN=memsql" -out client.csr
+
+# Client cert extensions: CA:FALSE
+cat > client_ext.cnf <<'EOF'
+[ v3_client ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+basicConstraints = CA:FALSE
+EOF
+
+# Self-sign client CSR with its key, applying v3_client
+openssl x509 -req -in client.csr -days "$VALIDITY" -sha256 -signkey client.key -passin pass:"$PASS" -out client.crt -extfile client_ext.cnf -extensions v3_client
+rm -f client.csr client_ext.cn
+
 # create self signed certs default is 2048 bit RSA
-openssl req -new -x509 -keyout client.key -out client.crt -subj "/C=US/ST=Denial/L=Seattle/O=NSA/CN=memsql" -days $VALIDITY -passout "pass:$PASS"
 openssl req -new -x509 -keyout server.key -out server.crt -subj "/C=US/ST=Denial/L=Seattle/O=NSA/CN=host.example.com" -days $VALIDITY -passout "pass:$PASS"
 
 # create schema cert

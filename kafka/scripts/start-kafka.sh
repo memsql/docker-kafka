@@ -11,6 +11,7 @@ set -ex pipefail
 # * NUM_PARTITIONS: configure the default number of log partitions per topic
 
 CONFIG_PATH="${KAFKA_HOME}/config/server.properties"
+echo "" >> ${CONFIG_PATH}
 
 if [[ "${KAFKA_VERSION}" < "3.3" ]]; then
     # Configure advertised host/port if we run in helios
